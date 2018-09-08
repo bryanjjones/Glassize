@@ -127,7 +127,6 @@ def linehunt(midstart,mbbounds,searchspace=degspace,temprange=degforlin,m=None):
         midtemptest=midstart+i
         parameters=(0,0) # best guesses, could add at argument
         if m:
-            print "fixed m value at: "+str(m)
             attempt = opt.minimize(fit, parameters, args=(midtemptest, temprange,m), method='SLSQP', bounds=mbbounds, options={'maxiter': 1e3})
             #if attempt.x[0]!=m:
             #    print "solved m is: "+str(attempt.x[0])+", but fixed m is: "+str(m)
@@ -153,15 +152,15 @@ def linehunt(midstart,mbbounds,searchspace=degspace,temprange=degforlin,m=None):
         print "y="+str(result.x[0])+"x+"+str(result.x[1])
         return(midtemp,result.x[0],result.x[1],temprange)# returns midtemp of line, solved "m" and, solved "b", and temp range (up and down from midtemp)
 
-print "FITTING PRE LINE"
+print "FITTING GLASS LINE"
 preline=linehunt(premid,prebnds)
 premid, prem, preb, pretemprange = preline
 
-print "FITTING POST LINE"
+print "FITTING LIQUID LINE"
 postline=linehunt(postmid,postbnds)
 postmid, postm, postb, posttemprange = postline
 
-print "FITTING TRANS LINE"
+print "FITTING TRANSITION LINE"
 transline=linehunt(Tg,transbnds,searchspace=0,m=Tgflow)
 transmid, transm, transb, transtemprange = transline
 #sanity check
