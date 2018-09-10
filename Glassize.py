@@ -27,7 +27,7 @@ data=[]
 lines=[]
 
 try:
-    f = codecs.open(args.FILENAME, 'r', 'utf-8') # open the file given, codecs reads it as utf-16
+    f = codecs.open(args.FILENAME, 'r', 'utf-8') # open the file given, codecs reads it as utf-8
     temp = f.read()
 except UnicodeError:
     print "file not standard unicode, trying to read as utf-16"
@@ -38,9 +38,9 @@ except UnicodeError:
         print "file not utf-18 either"
         sys.exit(1)
     else:
-        f = codecs.open(args.FILENAME, 'r', 'utf-16') # open the file given, codecs reads it as utf-16
+        f = codecs.open(args.FILENAME, 'r', 'utf-16') # Error unless reopened file in an else statement. It's like it closes it after the try
 else:
-    f = codecs.open(args.FILENAME, 'r', 'utf-8')
+    f = codecs.open(args.FILENAME, 'r', 'utf-8')  # Error unless reopened file in an else statement. It's like it closes it after the try
 
 #get rid of whitespace & newline charcters
 for line in f:
