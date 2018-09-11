@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import scipy.optimize as opt
 from math import log10, floor 
 import ntpath
+import os
 
 
 #Parameters to set:
@@ -75,7 +76,8 @@ def linehunt(midstart,mbbounds,searchspace=degspace,temprange=degforlin,Temp=Non
         print "y = "+str(round_sig(result.x[0]))+"x + "+str(round_sig(result.x[1]))
         return(midtemp,result.x[0],result.x[1],temprange)# returns midtemp of line, solved "m" and, solved "b", and temp range (up and down from midtemp)
 
-def Analyze(filename):
+#main function to analyze a DSC file
+def Analyze(filename,graphs=True):
     basename=path_leaf(filename)
     print "opening file \""+basename+"\"",
     data=[]
@@ -199,57 +201,59 @@ def Analyze(filename):
         print "Glass Transition Onset: "+str(round(Onset,1))+" deg C"
     else: print" Onset not found"
     
-    ##### Draw Figure
-    plt.figure(0) # derivative plot
-    plt.plot(Temp, hflowd, label = "derivative")
-    plt.axvline(x=Tg,color='burlywood',label="Tg")
-    plt.axvline(x=Onset,color="orange",label="Tg_onset")
-    #plt.axvspan(Onset, End, facecolor='#2ca02c', alpha=0.2)
-    #plt.axvline(x=Onset, color='chartreuse',label="Onset")
-    plt.legend(loc=2)
-    
-    # x-axis label
-    plt.xlabel('Temp deg C')
-    # frequency label
-    plt.ylabel('heat flow derivative (mW/C)')
-    # plot title
-    plt.title(basename+" derivative")
-    
-    plt.xlim(TgRANGElow,TgRANGEhigh)
-    plt.ylim((min(hflowd[window[:]])-0.01),(max(hflowd[window[:]])+0.01)) # y window set to maximum range +/- 0.01
-    plt.savefig(basename+"_derivative.png")
-    
-    
-    plt.figure(1) # main plot
-    #remove unwanted portions of lines
-    pre[:prerange[0]]=numpy.nan #remove pre line up through the begining of pre range
-    pre[Tgpos[0]:]=numpy.nan #remove pre line past Tg
-    trans[:0.5*(transrange[1]+prerange[-1])]=numpy.nan #remove trans line up through half-way between the end of pre range and the start of trans range
-    trans[0.5*(postrange[0]+transrange[-1]):]=numpy.nan #remove trans line past half-way between the end of trans range and the start of post range
-    post[:Tgpos[0]]=numpy.nan # remove post line up through Tg
-    post[postrange[-1]:] =numpy.nan# remove post line after post range
-    matplotlib.pyplot.plot(Temp,hflow,label = "data")
-    plt.plot(Temp, pre, label = "glass",linestyle='dashed', lw=2)
-    plt.plot(Temp, post, label = "liquid", linestyle='dashed', lw=2)
-    plt.plot(Temp, trans, label = "transition", linestyle='dashed', lw=2)
-    
-    plt.axvline(x=Tg,color='burlywood',label="Tg")
-    plt.axvline(x=Onset, color="orange", label="Tg_onset")
-    plt.axvspan(Temp[prerange[0]], Temp[prerange[-1]], facecolor='#0c002c', alpha=0.2)
-    plt.axvspan(Temp[postrange[0]], Temp[postrange[-1]], facecolor='#0ca000', alpha=0.2)
-    plt.legend(loc=2)
-    
-    # x-axis label
-    plt.xlabel('Temp deg C')
-    # frequency label
-    plt.ylabel('heat flow (mW)')
-    # plot title
-    plt.title(basename)
-    
-    #plt.xlim((-10, 100))
-    plt.xlim(TgRANGElow,TgRANGEhigh)
-    plt.ylim((min(hflow[window[:]])-0.1),(max(hflow[window[:]])+0.1))  # y window set to maximum range +/- 0.1
-    plt.savefig(basename+"_plot.png")
+    if graphs:
+        ##### Draw Figure
+        plt.figure() # derivative plot
+        plt.plot(Temp, hflowd, label = "derivative")
+        plt.axvline(x=Tg,color='burlywood',label="Tg")
+        plt.axvline(x=Onset,color="orange",label="Tg_onset")
+        #plt.axvspan(Onset, End, facecolor='#2ca02c', alpha=0.2)
+        #plt.axvline(x=Onset, color='chartreuse',label="Onset")
+        plt.legend(loc=2)
+        
+        # x-axis label
+        plt.xlabel('Temp deg C')
+        # frequency label
+        plt.ylabel('heat flow derivative (mW/C)')
+        # plot title
+        plt.title(basename+" derivative")
+        
+        plt.xlim(TgRANGElow,TgRANGEhigh)
+        plt.ylim((min(hflowd[window[:]])-0.01),(max(hflowd[window[:]])+0.01)) # y window set to maximum range +/- 0.01
+        plt.savefig(basename+"_derivative.png")
+        plt.close()
+        
+        plt.figure() # main plot
+        #remove unwanted portions of lines
+        pre[:prerange[0]]=numpy.nan #remove pre line up through the begining of pre range
+        pre[Tgpos[0]:]=numpy.nan #remove pre line past Tg
+        trans[:0.5*(transrange[1]+prerange[-1])]=numpy.nan #remove trans line up through half-way between the end of pre range and the start of trans range
+        trans[0.5*(postrange[0]+transrange[-1]):]=numpy.nan #remove trans line past half-way between the end of trans range and the start of post range
+        post[:Tgpos[0]]=numpy.nan # remove post line up through Tg
+        post[postrange[-1]:] =numpy.nan# remove post line after post range
+        matplotlib.pyplot.plot(Temp,hflow,label = "data")
+        plt.plot(Temp, pre, label = "glass",linestyle='dashed', lw=2)
+        plt.plot(Temp, post, label = "liquid", linestyle='dashed', lw=2)
+        plt.plot(Temp, trans, label = "transition", linestyle='dashed', lw=2)
+        
+        plt.axvline(x=Tg,color='burlywood',label="Tg")
+        plt.axvline(x=Onset, color="orange", label="Tg_onset")
+        plt.axvspan(Temp[prerange[0]], Temp[prerange[-1]], facecolor='#0c002c', alpha=0.2)
+        plt.axvspan(Temp[postrange[0]], Temp[postrange[-1]], facecolor='#0ca000', alpha=0.2)
+        plt.legend(loc=2)
+        
+        # x-axis label
+        plt.xlabel('Temp deg C')
+        # frequency label
+        plt.ylabel('heat flow (mW)')
+        # plot title
+        plt.title(basename)
+        
+        #plt.xlim((-10, 100))
+        plt.xlim(TgRANGElow,TgRANGEhigh)
+        plt.ylim((min(hflow[window[:]])-0.1),(max(hflow[window[:]])+0.1))  # y window set to maximum range +/- 0.1
+        plt.savefig(basename+"_plot.png")
+        plt.close()
 
 #READING DATA IN
 parser = argparse.ArgumentParser(description='File',prog='Analyze.py') #read the flags
@@ -258,7 +262,14 @@ args = parser.parse_args()
 
 if args.FILENAME==None:
     print "no file specified, analyzing files in ToProcess folder"
+    os.listdir("./ToProcess")
+    filelist = [f for f in os.listdir("./ToProcess") if os.path.isfile(os.path.join("./ToProcess", f))]
+    plotnumber=0
+    for file in filelist:
+        Analyze("./ToProcess/"+file)
     sys.exit()
+elif not os.path.isfile(args.FILENAME):
+    sys.exit(args.FILENAME+" does not exist. Please specify a DSC file, or leave blank and place file(s) to be analyzed in /ToProcess")
 else:
     Analyze(args.FILENAME)
     sys.exit()
