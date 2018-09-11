@@ -7,7 +7,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import scipy.optimize as opt
-#import io #needed for open file commands
+from math import log10, floor 
 
 #Parameters to set:
 TgRANGEhigh=80 #top temperature to examine
@@ -22,6 +22,9 @@ deviation=0.1 # devation from baseline (preline) towards end line (postline), 0.
 parser = argparse.ArgumentParser(description='File',prog='Analyze.py') #read the flags
 parser.add_argument('-f', '--file', metavar='FILENAME.txt',dest='FILENAME',help='txt data file to be analyzed') # read flag for file into "FILENAME" variable
 args = parser.parse_args()
+if args.FILENAME==None:
+    print "no file specified, analyzing files in ToProcess folder"
+    
 print "opening file \""+args.FILENAME+"\"",
 data=[]
 lines=[]
@@ -95,6 +98,10 @@ print "Tg (maximum slope): "+str(round(Tg,1))+" deg C"
 #define regions to determine linear reagions
 transrange=[i for i,x in enumerate(Temp) if Tg-(0.5*degforlin)<x<Tg+(0.5*degforlin)] # list with the positions in the temperature window for the low temp line
 
+#round to 3 sig figs
+def round_sig(x, sig=3):
+    return round(x, sig-int(floor(log10(abs(x))))-1)
+
 #function to test the fit of lines
 def fit(params,midtemp,temprange,fixedm=None): #((m,b),midtemp,temprange), Returns total difference
     b = params[1] #second parameter is "b"
@@ -143,13 +150,13 @@ def linehunt(midstart,mbbounds,searchspace=degspace,temprange=degforlin,m=None):
         result = opt.minimize(fit, parameters, args=(midtemp, temprange,m), method='SLSQP', bounds=mbbounds, options={'maxiter': 1e6})
     else:
         result = opt.minimize(fit, parameters, args=(midtemp, temprange), method='SLSQP', bounds=mbbounds, options={'maxiter': 1e6})
-    print "best fit: "+str(result.fun),
-    print "fit range "+str(midtemp-temprange)+" to "+str(midtemp+temprange)+" deg C",
+    print "best fit: "+str(round_sig(result.fun,2)),
+    print "fit range "+str(round_sig((midtemp-temprange)[0]))+" to "+str(round_sig((midtemp+temprange)[0]))+" deg C. Equation:",
     if m:
-        print "y="+str(m)+"x+"+str(result.x[1])
+        print "y = "+str(round_sig(x))+"x  +"+str(round_sig(result.x[1]))
         return(midtemp,m,result.x[1],temprange) # returns midtemp of line, "m" and, solved "b", and temp range (up and down from midtemp)
     else:    
-        print "y="+str(result.x[0])+"x+"+str(result.x[1])
+        print "y = "+str(round_sig(result.x[0]))+"x + "+str(round_sig(result.x[1]))
         return(midtemp,result.x[0],result.x[1],temprange)# returns midtemp of line, solved "m" and, solved "b", and temp range (up and down from midtemp)
 
 print "FITTING GLASS LINE"
