@@ -13,12 +13,12 @@ import os
 
 
 #Parameters to set:
-TgRANGEhigh=80 #top temperature to examine
-TgRANGElow=20 #lowest temperature to examine
-degforlin=2 #window in degrees up or down from midpoint to calculate linear regions 
-degspace=5 #space in degrees between linear regions
-smooth=20 # value for smoothing function, 1 is no smoothing. Higher averages nearby points
-deviation=0.1 # devation from baseline (preline) towards end line (postline), 0.1 = 10% shift towards post line
+TgRANGEhigh=80 #top temperature to examine. Default is 80
+TgRANGElow=20#lowest temperature to examine. Default is 20
+degforlin=2 #window in degrees up or down from midpoint to calculate linear regions. Default is 2
+degspace=5 #space in degrees between linear regions. Default is 5
+smooth=20 # value for smoothing function, 1 is no smoothing. Higher averages nearby points. Default is 20.
+deviation=0.1 # devation from baseline (preline) towards end line (postline), 0.1 = 10% shift towards post line. Default is 0.1
 #tempshift=1 #used to scale temperature to better solve
 
 #round to 3 sig figs
@@ -189,7 +189,9 @@ def Analyze(filename,graphs=True):
     trans = transm*numpy.array(Temp)+transb # calculate line pre (y=mx+b) store y values as pre
     
     deviationstart=[i for i,x in enumerate(Temp) if premid<x<Tg] # list with the positions in the temperature window to look for devations from pre line
-    print"Tg is: "+str(round(Tg,1))+" degrees, ",
+    print "" 
+    print"****  FILE: "+basename+"  *****"
+    print"****  Tg is: "+str(round(Tg,1))+" degrees, ",
     Onset=None
     End=0 
     #find the onset as defined by 10% of the way between pre line and post line
@@ -198,8 +200,9 @@ def Analyze(filename,graphs=True):
             if hflow[i]>((deviation*(postb+postm*Temp[i]))+((1-deviation)*(preb+prem*Temp[i]))):
                 Onset=Temp[i]
     if Onset: 
-        print "Glass Transition Onset: "+str(round(Onset,1))+" deg C"
-    else: print" Onset not found"
+        print "Glass Transition Onset: "+str(round(Onset,1))+" deg C  ****"
+    else: print" Onset not found  ****"
+    print ""
     
     if graphs:
         ##### Draw Figure
